@@ -4,7 +4,7 @@
 
 #define LED_PORT GPIOD
 
-#define pinA GPIO_PIN_0
+#define pinA GPIO_PIN_12
 #define pinB GPIO_PIN_1
 #define pinC GPIO_PIN_2
 #define pinD GPIO_PIN_3

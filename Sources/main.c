@@ -21,13 +21,24 @@
 void SystemClock_Config	(void);
 void tim_init(void);
 void gpio_init(void);
+float change_digit(float number, int digit, int new_val);
+void memsinit(void);
 
-
+//Data ready interrupt flag
+int data_ready = 0;
 
 int main(void)
 {	
   //VARIABLES
-  int num = -1;
+  int input = 0; //Input state
+
+  //Input variables
+  float num = 12.0f;
+  int event = -1;
+  int digit = 0;
+
+  //Angle variables
+  float angle_value = 0.0f;
 
   /* MCU Configuration----------------------------------------------------------*/
   HAL_Init();
@@ -39,22 +50,95 @@ int main(void)
 
 	tim_init();
 	gpio_init();
+  memsinit();
 	
-	
-	
-	
-	LED_set_value(499.8);
+    NVIC_SetPriority(EXTI0_IRQn, 1); //4. Set Priority to 1
+    NVIC_EnableIRQ(EXTI0_IRQn);
+
+	LED_set_value(num);
 
 	while (1){
-    KP_update();
-    num = KP_getValue();
-
-    if (num > -1)
-    {
-      LED_set_value(num);
+    if (input) {
+      KP_update();
+      event = KP_getEvent();
+      if (event == 11) {
+        input = 0;
+      }else if (event > -1 && event < 10) {
+        num = change_digit(num, digit, event);
+        LED_set_value(num);
+        digit = (digit + 1) % 4;
+      }
     } else {
-      LED_set_value(888.8f);
+
+        if (data_ready) {
+          LIS3DSH_ReadACC(&angle_value);
+
+          //CONVERT ANGLE READING
+
+  				LED_set_value(angle_value);
+          data_ready = 0;
+        }
     }
+	}
+}
+
+float change_digit(float number, int digit, int new_val){
+  int base_int = (int)(number * 10);
+
+  int dec = base_int % 10;
+  int one = (base_int / 10) % 10;
+  int ten = (base_int / 100) % 10;
+  int hundred = (base_int / 1000) % 10;
+
+  if (digit == 3) {
+    float decimal = ((float)dec) / 10;
+    number -= decimal;
+    decimal = ((float)new_val) / 10;
+    number += decimal;
+    return number;
+  }
+  if (digit == 2) {
+    return number - one + new_val;
+  }
+  if (digit == 1) {
+    return number - (ten * 10) + (new_val * 10);
+  }
+  if (digit == 0) {
+    return number - (hundred * 100) + (new_val * 100);
+  }
+
+  return -1;
+}
+
+void memsinit(void){
+
+  LIS3DSH_InitTypeDef meminit;
+  LIS3DSH_DRYInterruptConfigTypeDef intinit;
+
+  meminit.Continous_Update = LIS3DSH_ContinousUpdate_Disabled;
+  meminit.Power_Mode_Output_DataRate = LIS3DSH_DATARATE_25;
+  meminit.AA_Filter_BW = LIS3DSH_AA_BW_800;
+  meminit.Axes_Enable = LIS3DSH_X_ENABLE;
+  meminit.Full_Scale = LIS3DSH_FULLSCALE_2;
+  meminit.Self_Test = LIS3DSH_SELFTEST_NORMAL;
+  
+  LIS3DSH_Init(&meminit);
+
+  intinit.Dataready_Interrupt = LIS3DSH_DATA_READY_INTERRUPT_ENABLED;
+  intinit.Interrupt_signal = LIS3DSH_ACTIVE_HIGH_INTERRUPT_SIGNAL;
+  intinit.Interrupt_type = LIS3DSH_INTERRUPT_REQUEST_PULSED;
+  
+  LIS3DSH_DataReadyInterruptConfig(&intinit);
+
+  
+}
+
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin){
+  
+	if (GPIO_pin == GPIO_PIN_0){
+		data_ready = 1;
 	}
 }
 
@@ -135,7 +219,7 @@ void gpio_init(void){
   
   __GPIOA_CLK_ENABLE();
   __GPIOD_CLK_ENABLE();
-  //__GPIOE_CLK_ENABLE();
+  __GPIOE_CLK_ENABLE();
   //__GPIOC_CLK_ENABLE();
   //__GPIOH_CLK_ENABLE();
   //__GPIOB_CLK_ENABLE();
@@ -146,19 +230,29 @@ void gpio_init(void){
 	
 /*Configure GPIOA pins */
   ///3x4 Keypad
-	GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_7;
+	GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-/*Configure GPIOE pins */
+/*Configure GPIOD pins */
 	///7 segment display
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+
+/*Configure GPIOe pins*/
+  ///Accelerometer data ready interrupt
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
 

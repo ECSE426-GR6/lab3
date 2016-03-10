@@ -60,6 +60,11 @@
 /*            Cortex-M4 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
+void EXTI0_IRQHandler(void){
+	printf("it ran");
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
+
 /**
   * @brief   This function handles NMI exception.
   * @param  None
