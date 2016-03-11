@@ -34,10 +34,10 @@ int data_ready = 0;
 int main(void)
 {	
   //VARIABLES
-  int input = 0; //Input state
+  int input = 1; //Input state
 
   //Input variables
-  float num = 12.0f;
+  float num = 0.0f;
   int event = -1;
   int digit = 0;
 
@@ -62,20 +62,20 @@ k_filter_init(0.005f, 0.1f, 0.0f, 3.0f, 0.0f);
 	LED_set_value(num);
 
 	while (1){
-    if (input) {
+
+    if (input) { //Input mode
       KP_update();
       event = KP_getEvent();
-      if (event == 11) {
+      if (event == 11) { //# pressed
         input = 0;
-      }else if (event > -1 && event < 10) {
+				LED_set_target(num);
+      }else if (event > -1 && event < 10) { //Other key pressed
         num = change_digit(num, digit, event);
         LED_set_value(num);
         digit = (digit + 1) % 4;
       }
-    } else {
-
+    } else { //Playing mode
         if (data_ready) {
-         
           //CONVERT ANGLE READING
 					//set LED to the filtered angle value
   				LED_set_value(k_filter_value(Rangle()));
@@ -85,6 +85,7 @@ k_filter_init(0.005f, 0.1f, 0.0f, 3.0f, 0.0f);
 	}
 }
 
+//Helper function to change one digit of a floating point number (used in input mode)
 float change_digit(float number, int digit, int new_val){
   int base_int = (int)(number * 10);
 
@@ -280,7 +281,7 @@ void gpio_init(void){
 
 /*Configure GPIOD pins */
 	///7 segment display
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_12|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);

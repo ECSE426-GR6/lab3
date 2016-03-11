@@ -30,6 +30,9 @@ void update_not_latched(void);
 void update_latched(void);
 void latch_count_update(void);
 
+/**
+* Scanning the keypad and keeping track of the button state
+*/
 void KP_update(void){
 	
 
@@ -47,6 +50,7 @@ void KP_update(void){
 
 }
 
+// When not currently devouncing a key, check for a new keypress
 void update_not_latched(void){
 	int x = 0;
 	int y = 0;
@@ -68,16 +72,21 @@ void update_not_latched(void){
 	}
 }
 
+//When deboncing keys, check if stable and released
 void update_latched(void){
 	latch_count_update();
+
+	//Stable high signal
 	if (latch_count > LATCH_CONFIRM_COUNT) {
 		latch_ready = 1;
 	}
 
+	//Sable low before propper latch (not registered as keypress)
 	if (latch_count < -1 * LATCH_CONFIRM_COUNT) {
 		latched = 0;
 	}
 
+	//Stable high detected, waiting for key release
 	if (latch_ready) {
 		if (!cols[latch_x]){
 			if (!rows[latch_y]){
@@ -88,7 +97,7 @@ void update_latched(void){
 		}
 	}
 }
-
+//Update the latch count (add if hig, decrease if low)
 void latch_count_update(void){
 	if (cols[latch_x]) {
 		if (rows[latch_y]){
@@ -100,6 +109,11 @@ void latch_count_update(void){
 	}
 }
 
+/**
+* Get previously latched key 
+* Returns the last button that was clicked (pressed, stabilized and released)
+*/
+
 int KP_getEvent(void){
 	if (event_ready){
 		event_ready = 0;
@@ -109,6 +123,9 @@ int KP_getEvent(void){
 	return -1;
 }
 
+/**
+* Get value of key pressed down
+*/
 int KP_getValueDown(void){
 	int i = 0;
 	int x = -1;

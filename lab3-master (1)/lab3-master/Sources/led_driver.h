@@ -18,6 +18,7 @@
 #define cathode1 GPIO_PIN_10
 #define cathode2 GPIO_PIN_9
 #define cathode3 GPIO_PIN_8
+#define cathode4 GPIO_PIN_13
 
 #define segA 0x0001
 #define segB 0x0002
@@ -37,8 +38,11 @@
 #define dig7 0x07
 #define dig8 0x7f
 #define dig9 0x67
+#define blank 0x00
+#define mid_bar 0x40
 
 
 void LED_update(void);
 void LED_set_value(float);
 float LED_get_value(void);
+void LED_set_target(float);

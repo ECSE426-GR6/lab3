@@ -1,8 +1,8 @@
 .\objects\kp_driver.o: Sources\kp_driver.c
 .\objects\kp_driver.o: Sources\kp_driver.h
 .\objects\kp_driver.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h
-.\objects\kp_driver.o: E:\Lab 3 demo\lab3-master (1)\lab3-master\RTE\Device\STM32F407VGTx\stm32f4xx_hal_conf.h
-.\objects\kp_driver.o: E:\Lab 3 demo\lab3-master (1)\lab3-master\RTE\RTE_Components.h
+.\objects\kp_driver.o: C:\Users\Francis\Dropbox\School\2016 - Winter\Microprocessor Systems\lab3\lab3-master (1)\lab3-master\RTE\Device\STM32F407VGTx\stm32f4xx_hal_conf.h
+.\objects\kp_driver.o: C:\Users\Francis\Dropbox\School\2016 - Winter\Microprocessor Systems\lab3\lab3-master (1)\lab3-master\RTE\RTE_Components.h
 .\objects\kp_driver.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h
 .\objects\kp_driver.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h
 .\objects\kp_driver.o: C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
